@@ -1,11 +1,14 @@
 {
     "name": "cubitcreative/statamic-places",
-    "description": "A search field for Google Places.",
+    "description": "Google Places search box for Statamic.",
     "authors": [
         {
             "name": "Casey Dwyer"
         }
     ],
+    "require": {
+        "statamic/cms": "^3.0"
+    },
     "autoload": {
         "psr-4": {
             "CuBitCreative\\StatamicPlaces\\": "src"

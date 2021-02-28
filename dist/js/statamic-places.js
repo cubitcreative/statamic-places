@@ -111,6 +111,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
+      placeSelected: false,
       placesSearch: null,
       selectedPlace: {}
     };
@@ -119,7 +120,7 @@ __webpack_require__.r(__webpack_exports__);
     this.initSelectedPlace();
     this.initPlacesSearch();
 
-    if (this.value.line_1) {
+    if (this.value && this.value.line_1) {
       this.selectedPlace = this.value;
     }
   },
@@ -128,6 +129,10 @@ __webpack_require__.r(__webpack_exports__);
       return 'statamic-places-' + this._uid;
     },
     replicatorPreview: function replicatorPreview() {
+      if (!this.value) {
+        return '';
+      }
+
       var address = this.value.line_1 + ', ' + this.value.city + ', ' + this.value.state;
       return this.value.line_1 ? address : '';
     }
@@ -141,6 +146,7 @@ __webpack_require__.r(__webpack_exports__);
       this.placesSearch.addListener('place_changed', this.placeChanged);
     },
     initSelectedPlace: function initSelectedPlace() {
+      this.placeSelected = false;
       this.selectedPlace = {
         title: '',
         line_1: '',
@@ -160,6 +166,7 @@ __webpack_require__.r(__webpack_exports__);
         return;
       }
 
+      this.placeSelected = true;
       this.parseSelectedPlace(place);
     },
     resetSelectedPlace: function resetSelectedPlace() {
@@ -359,7 +366,7 @@ var render = function() {
       )
     ]),
     _vm._v(" "),
-    _vm.selectedPlace.line_1 && _vm.config.expand_on_select
+    _vm.placeSelected && _vm.config.expand_on_select
       ? _c("div", { staticClass: "flex flex-wrap -mx-2" }, [
           _c(
             "div",

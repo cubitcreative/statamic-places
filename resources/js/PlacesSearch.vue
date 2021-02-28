@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <div v-if="selectedPlace.line_1 && config.expand_on_select" class="flex flex-wrap -mx-2">
+        <div v-if="placeSelected && config.expand_on_select" class="flex flex-wrap -mx-2">
             <div class="w-full px-2 mb-3">
                 <label>Address Line 1</label>
                 <text-input type="text" 
@@ -97,6 +97,7 @@
         },
         data(){ 
             return {
+                placeSelected: false,
                 placesSearch: null,
                 selectedPlace: {},
             }; 
@@ -105,16 +106,18 @@
         mounted: function () {
             this.initSelectedPlace();
             this.initPlacesSearch();
-            if(this.value.line_1){
+            if(this.value && this.value.line_1){
                 this.selectedPlace = this.value;
             }
         },
+
         computed: {
             fieldId(){
                 return 'statamic-places-' + this._uid;
             },
 
             replicatorPreview(){
+                if(! this.value){ return ''; }
                 let address = this.value.line_1 + ', ' + this.value.city + ', ' + this.value.state;
                 return this.value.line_1 ? address : '';
             }
@@ -129,6 +132,7 @@
             },
 
             initSelectedPlace(){
+                this.placeSelected = false;
                 this.selectedPlace = {
                     title: '',
                     line_1: '',
@@ -145,6 +149,7 @@
             placeChanged(){
                 let place = this.placesSearch.getPlace();
                 if (place.length == 0 || place.length > 1) { return; }
+                this.placeSelected = true;
 
                 this.parseSelectedPlace(place);
             },

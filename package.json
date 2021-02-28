@@ -13,5 +13,8 @@
         "postcss": "^8.2.6",
         "vue-loader": "^15.9.5",
         "vue-template-compiler": "^2.6.12"
+    },
+    "dependencies": {
+        "vue": "^2.6.11"
     }
 }
