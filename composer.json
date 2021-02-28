@@ -1,0 +1,25 @@
+{
+    "name": "cubitcreative/statamic-places",
+    "description": "A search field for Google Places.",
+    "authors": [
+        {
+            "name": "Casey Dwyer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "CuBitCreative\\StatamicPlaces\\": "src"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Statamic Places",
+            "description": "A search field for Google Places."
+        },
+        "laravel": {
+            "providers": [
+                "CuBitCreative\\StatamicPlaces\\ServiceProvider"
+            ]
+        }
+    }
+}
