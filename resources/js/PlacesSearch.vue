@@ -1,79 +1,89 @@
 <template>
     <div>
-        <div class="flex items-center w-full mb-4">
-            <div class="flex-grow">
-                <text-input :id="fieldId"
-                    type="text" 
-                    :placeholder="placeholder"
-                    :value="selectedPlace.title" 
-                />
+        <div class="flex flex-wrap -mx-2">
+            <div class="flex flex-wrap items-center px-2 mb-3" :class="placeSelected ? 'w-1/2':'w-full'">
+                <label class="w-full">Title</label>
+                <div class="flex-grow">
+                    <text-input :id="fieldId"
+                        type="text" 
+                        :placeholder="placeholder"
+                        v-model="selectedPlace.title" 
+                    />
+                </div>
+                <div @click="resetSelectedPlace" class="flex text-red ml-2 mr-1 opacity-50 hover:opacity-100 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19">
+                        <g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-width="2" transform="translate(1 1.545)">
+                            <path d="M16 0L.160533333 15.8389333M16 15.8389333L.160533333 0"/>
+                        </g>
+                    </svg>
+                </div>
             </div>
-            <div @click="resetSelectedPlace" class="flex text-red ml-2 mr-1 opacity-50 hover:opacity-100 cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19">
-                    <g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-width="2" transform="translate(1 1.545)">
-                        <path d="M16 0L.160533333 15.8389333M16 15.8389333L.160533333 0"/>
-                    </g>
-                </svg>
+            <div class="px-2 mb-3" :class="placeSelected ? 'w-1/2':'hidden'">
+                <label>Address Line 1</label>
+                <text-input type="text" 
+                    placeholder="123 Cherry Lane"
+                    v-model="selectedPlace.line_1" 
+                    @input="manuallyUpdated"
+                />
             </div>
         </div>
 
         <div v-if="placeSelected && config.expand_on_select" class="flex flex-wrap -mx-2">
-            <div class="w-full px-2 mb-3">
-                <label>Address Line 1</label>
-                <text-input type="text" 
-                    placeholder="123 Cherry Lane"
-                    :value="selectedPlace.line_1" 
-                    @input="update"
-                />
-            </div>
-
             <div class="w-1/2 md:w-1/4 px-2 mb-3">
                 <label>City</label>
                 <text-input type="text" 
                     placeholder="Kansas City"
-                    :value="selectedPlace.city" 
-                    @input="update"
+                    v-model="selectedPlace.city" 
+                    @input="manuallyUpdated"
                 />
             </div>
             <div class="w-1/2 md:w-1/4 px-2 mb-3">
                 <label>State</label>
                 <text-input type="text" 
                     placeholder="MO"
-                    :value="selectedPlace.state" 
-                    @input="update"
+                    v-model="selectedPlace.state" 
+                    @input="manuallyUpdated"
                 />
             </div>
             <div class="w-1/2 md:w-1/4 px-2 mb-3">
                 <label>Zipcode</label>
                 <text-input type="tel" 
                     placeholder="64102"
-                    :value="selectedPlace.zipcode" 
-                    @input="update"
+                    v-model="selectedPlace.zipcode" 
+                    @input="manuallyUpdated"
                 />
             </div>
             <div class="w-1/2 md:w-1/4 px-2 mb-3">
                 <label>Country</label>
                 <text-input type="text" 
                     placeholder="USA"
-                    :value="selectedPlace.country" 
-                    @input="update"
+                    v-model="selectedPlace.country" 
+                    @input="manuallyUpdated"
                 />
             </div>
 
-            <div class="w-1/2 px-2 mb-3">
+            <div class="w-1/4 px-2 mb-3">
                 <label>Lat</label>
-                <text-input type="tel" 
+                <text-input type="num" 
                     placeholder="39.0889824"
-                    :value="selectedPlace.lat" 
-                    @input="update"
+                    v-model="selectedPlace.lat" 
+                    @input="manuallyUpdated"
+                />
+            </div>
+            <div class="w-1/4 px-2 mb-3">
+                <label>Lon</label>
+                <text-input type="num" 
+                    placeholder="-94.6068529"
+                    v-model="selectedPlace.lon" 
+                    @input="manuallyUpdated"
                 />
             </div>
             <div class="w-1/2 px-2 mb-3">
-                <label>Lon</label>
-                <text-input type="tel" 
-                    placeholder="-94.6068529"
-                    :value="selectedPlace.lon" 
-                    @input="update"
+                <label>Maps URL</label>
+                <text-input type="url" 
+                    placeholder="https://google.com/maps/12345"
+                    v-model="selectedPlace.google_url" 
+                    @input="manuallyUpdated"
                 />
             </div>
         </div>
@@ -106,9 +116,6 @@
         mounted: function () {
             this.initSelectedPlace();
             this.initPlacesSearch();
-            if(this.value && this.value.line_1){
-                this.selectedPlace = this.value;
-            }
         },
 
         computed: {
@@ -125,25 +132,35 @@
         methods: {
             initPlacesSearch(){
                 let options = {
-                    fields: ["address_components", "geometry", "name"],
+                    fields: ["address_components", "geometry", "name", "place_id", "url"],
                 };
                 this.placesSearch = new google.maps.places.Autocomplete(document.getElementById(this.fieldId), options);
                 this.placesSearch.addListener('place_changed', this.placeChanged);
             },
 
-            initSelectedPlace(){
-                this.placeSelected = false;
-                this.selectedPlace = {
-                    title: '',
-                    line_1: '',
-                    city: '',
-                    state: '',
-                    country: '',
-                    zipcode: '',
-                    lat: '',
-                    lon: '',
-                    google_place_id: '',
-                };
+            initSelectedPlace(force = false){
+                if(this.value && ! force){
+                    this.placeSelected = true;
+                    this.selectedPlace = this.value;
+                } else {
+                    this.placeSelected = false;
+                    this.selectedPlace = {
+                        title: '',
+                        line_1: '',
+                        city: '',
+                        state: '',
+                        country: '',
+                        zipcode: '',
+                        lat: '',
+                        lon: '',
+                        google_place_id: '',
+                        google_url: '',
+                    };
+                }
+            },
+
+            manuallyUpdated(){
+                this.update(this.selectedPlace);
             },
 
             placeChanged(){
@@ -155,11 +172,12 @@
             },
 
             resetSelectedPlace(){
-                this.initSelectedPlace();
+                this.initSelectedPlace(true);
                 this.update(this.selectedPlace);
             },
 
             parseSelectedPlace(place){
+                console.log(place);
                 let addressComponents = place.address_components;
                 _.each(addressComponents, (component) => {
                     _.each(component.types, (type) => {
@@ -189,6 +207,7 @@
                 this.selectedPlace.lon = place.geometry.location.lng();
                 this.selectedPlace.title = place.name;
                 this.selectedPlace.google_place_id = place.place_id;
+                this.selectedPlace.google_url = place.url;
 
                 this.update(this.selectedPlace);
             },

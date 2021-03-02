@@ -19,9 +19,20 @@ class PlacesSearch extends Fieldtype
         ];
     }
 
+    public function augment($location)
+    {
+        $url = $location['google_url'] ??
+            'https://google.com/maps/place/' . urlencode($location['line_1'].', '.$location['city'].', '.$location['state'].' '.$location['zipcode']);
+        
+        $location['map_url'] = $url;
+
+        return $location;
+    }
+
     public function preProcessIndex($value)
 	{
+        $prefix = $value['title'] ? $value['title'] . ', ' : '';
 		$address = $value['line_1'] . ', ' . $value['city'] . ', ' . $value['state'];
-	    return $value['line_1'] ? $address : '';
+	    return $prefix . ($value['line_1'] ? $address : '');
 	}
 }
