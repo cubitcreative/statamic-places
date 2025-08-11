@@ -15,19 +15,19 @@ class ServiceProvider extends AddonServiceProvider
         __DIR__.'/../dist/js/statamic-places.js',
     ];
 
-    public function boot()
+    public function bootAddon()
     {
-    	parent::boot();
+        $this->publishes([
+            __DIR__.'/../config/statamic-places.php' => config_path('statamic/places.php'),
+        ], 'statamic-places-config');
 
-    	$this->publishes([
-    		__DIR__.'/../config/statamic-places.php' => config_path('statamic_places.php')
-    	], 'config');
-
-    	$this->externalScripts[] = 'https://maps.googleapis.com/maps/api/js?key='.config('statamic_places.api_key').'&libraries=places';
+        $this->externalScripts[] = 'https://maps.googleapis.com/maps/api/js?key='.config('statamic_places.api_key').'&libraries=places';
     }
 
     public function register()
     {
-		$this->mergeConfigFrom(__DIR__.'/../config/statamic-places.php', 'statamic.statamic_places');
+        parent::register();
+
+        $this->mergeConfigFrom(__DIR__.'/../config/statamic-places.php', 'statamic.places');
     }
 }
